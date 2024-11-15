@@ -1,0 +1,126 @@
+# SSTable Implementation in Go
+
+This project demonstrates a simple implementation of an **SSTable (Sorted String Table)** in Go. SSTables are immutable, sorted structures commonly used in databases like **Cassandra** or **LevelDB** for efficient storage and retrieval of key-value pairs.
+
+---
+
+## Features
+- **Memtable**:
+  - An in-memory structure for storing key-value pairs.
+- **Flush to Disk**:
+  - Writes the sorted key-value pairs from the Memtable to a disk file as an SSTable.
+  - Utilizes the Go `gob` package for efficient serialization.
+- **Search in SSTable**:
+  - Performs sequential searches for keys in the SSTable file.
+
+---
+
+## How It Works
+### Write Path
+1. **Insert Key-Value Pairs into the Memtable**:
+   - Keys and values are stored in an in-memory map.
+2. **Flush Memtable to SSTable**:
+   - Keys are sorted.
+   - Serialized into a file using the `gob` package.
+
+### Read Path
+1. **Search for a Key in the SSTable**:
+   - Opens the SSTable file.
+   - Decodes entries sequentially until the desired key is found.
+
+---
+
+## File Structure
+- **`main.go`**:
+  - Contains the Memtable implementation, SSTable serialization, and query functions.
+  - Demonstrates the end-to-end functionality in the `main()` function.
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Go 1.18 or later installed on your system.
+
+### Clone the Repository
+```bash
+git clone <repository_url>
+cd <repository_directory>
+```
+
+---
+
+## Running the Program
+
+### Step 1: Build and Run
+```bash
+go run main.go
+```
+
+### Step 2: Output
+The program:
+1. Adds key-value pairs to the Memtable.
+2. Flushes the Memtable to an SSTable file (`sstable.gob`).
+3. Queries the SSTable for a specific key.
+
+Example Output:
+```
+Flushed Memtable to SSTable: sstable.gob
+Found key 'carrot' with value 'vegetable' in SSTable
+```
+
+---
+
+## Key Functions
+
+### Memtable
+#### `NewMemtable()`
+Creates a new Memtable instance.
+
+#### `Put(key, value string)`
+Adds a key-value pair to the Memtable.
+
+#### `FlushToDisk(filename string) error`
+Serializes and writes the sorted Memtable data to the SSTable file.
+
+---
+
+### SSTable
+#### `SearchSSTable(filename, key string) (string, bool)`
+Searches for a key in the SSTable file. Returns the value and a boolean indicating whether the key was found.
+
+---
+
+## Code Walkthrough
+### Insert Data
+```go
+memtable.Put("apple", "fruit")
+memtable.Put("carrot", "vegetable")
+memtable.Put("banana", "fruit")
+```
+
+### Flush Data to SSTable
+```go
+err := memtable.FlushToDisk("sstable.gob")
+if err != nil {
+    log.Fatal("Error flushing to SSTable:", err)
+}
+```
+
+### Query SSTable
+```go
+value, found := SearchSSTable("sstable.gob", "carrot")
+if found {
+    fmt.Printf("Found key 'carrot' with value '%s'\n", value)
+}
+```
+
+---
+
+## Future Improvements
+- **Binary Search**:
+  Implement binary search on the SSTable for faster lookups.
+- **Indexing**:
+  Add an index block for quick range queries.
+- **Bloom Filter**:
+  Add a bloom filter to skip SSTables that do not contain the key.
